@@ -1,0 +1,17 @@
+FROM ubuntu:18.04
+
+LABEL Name=consumer Version=0.0.1
+
+RUN apt-get update 
+RUN apt-get install -y python3 python3-pip locales build-essential
+RUN apt-get autoremove -y
+RUN apt-get clean
+
+# installing packages needed and pip packages
+RUN python3 -m pip install kafka-python
+RUN python3 -m pip install confluent-kafka
+
+WORKDIR /app
+ADD . /app
+
+CMD ["python3", "-m", "consumer"]

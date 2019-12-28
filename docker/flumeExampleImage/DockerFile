@@ -1,0 +1,48 @@
+# Using standard ubuntu LTS version
+FROM ubuntu:18.04
+
+# Settings labels
+LABEL Name=flume Version=0.0.1 Maintainer="Jakob Hviid <jah@mmmi.sdu.dk>"
+
+# installing needed packages
+RUN apt-get update 
+RUN apt-get install -y wget openjdk-8-jre-headless vim nano telnet
+RUN apt-get autoremove -y
+RUN apt-get clean
+
+# Getting FLume Binaries and readying the folder in /flume
+RUN wget http://ftp.download-by.net/apache/flume/1.9.0/apache-flume-1.9.0-bin.tar.gz
+RUN tar -zxvf apache-flume-1.9.0-bin.tar.gz
+RUN rm apache-flume-1.9.0-bin.tar.gz
+RUN mv apache-flume-1.9.0-bin flume
+
+# Setting up environment variables
+RUN echo 'export FLUME_HOME=/flume/' >> ~/.bashrc
+RUN echo 'export PATH=$PATH:$FLUME_HOME/bin/' >> ~/.bashrc
+RUN echo 'export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/' >> ~/.bashrc
+RUN export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/
+
+# Readying for example code
+EXPOSE 44444
+
+WORKDIR /flume
+
+ADD flume-console.conf /flume/conf/
+ADD flume-twitter-to-console.conf /flume/conf/
+ADD flume-twitter-to-file.conf /flume/conf/
+ADD flume-twitter-to-hdfs.conf /flume/conf/
+
+
+
+# Console Example
+# flume-ng agent --conf conf --conf-file ./conf/flume-console.conf --name a1 -Dflume.root.logger=INFO,console
+
+# Twitter HDFS Example
+# flume-ng agent --conf ./conf/ -f ./conf/flume-twitter-hdfs.conf  --name TwitterAgent
+
+# Twitter Console Example
+# flume-ng agent --conf ./conf/ -f ./conf/flume-twitter-to-console.conf --name TwitterAgent -Dflume.root.logger=INFO,console
+
+# Twitter File Example
+# mkdir twitterlogs
+# flume-ng agent --conf ./conf/ -f ./conf/flume-twitter-to-file.conf --name TwitterAgent

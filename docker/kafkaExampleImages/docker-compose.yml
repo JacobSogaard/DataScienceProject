@@ -1,0 +1,84 @@
+version: "3.5"
+
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    restart: always
+    # ports:
+    #   - "2181:2181"
+    volumes:
+      - zookeeper_conf:/opt/zookeeper-3.4.13/conf
+      - zookeeper_data:/opt/zookeeper-3.4.13/data
+    networks:
+      kafka_network:
+        ipv4_address: 172.200.1.100
+
+  kafka1:
+    image: wurstmeister/kafka:latest
+    restart: always
+    depends_on:
+      - zookeeper
+    # ports:
+    #   - "9092:9092"
+    volumes:
+      - kafka1:/kafka
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 172.200.1.101
+      KAFKA_CREATE_TOPICS: "testtopic:1:1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    networks:
+      kafka_network:
+        ipv4_address: 172.200.1.101
+
+  kafka2:
+    image: wurstmeister/kafka:latest
+    restart: always
+    depends_on:
+      - zookeeper
+    # ports:
+    #   - "9092:9092"
+    volumes:
+      - kafka2:/kafka
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 172.200.1.102
+      KAFKA_CREATE_TOPICS: "testtopic:1:1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    networks:
+      kafka_network:
+        ipv4_address: 172.200.1.102
+
+  kafka3:
+    image: wurstmeister/kafka:latest
+    restart: always
+    depends_on:
+      - zookeeper
+    # ports:
+    #   - "9092:9092"
+    volumes:
+      - kafka3:/kafka
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 172.200.1.103
+      KAFKA_CREATE_TOPICS: "testtopic:1:1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    networks:
+      kafka_network:
+        ipv4_address: 172.200.1.103
+
+networks:
+  kafka_network:
+    name: kafkaNetwork
+    ipam:
+      config:
+        - subnet: 172.200.1.0/24
+
+volumes:
+  kafka1:
+    name: kafka1
+  kafka2:
+    name: kafka2
+  kafka3:
+    name: kafka3
+  zookeeper_conf:
+    name: zookeeper-conf
+  zookeeper_data:
+    name: zookeeper-data
