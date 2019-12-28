@@ -27,6 +27,17 @@ ENV LC_ALL en_US.UTF-8
 # adding files to the container
 WORKDIR /app
 ADD . /app
+#WORKDIR /data
+#ADD . /data
+
+#ADD . /data
+#COPY ~/home/jacob/Desktop/DataScience/project/DataScienceProject/docker/data.csv /data
+
+# TODO Get namenode id through terminal or script and insert that into the cmd below
 
 # running the python file at container startup
+CMD ["docker cp data.csv b85a28e44824c578ec2df2fcf1495b133247bbd9d6f9f3f311fe6d69141db31b:/data.csv"]
+CMD ["docker cp data_sffd_service_calls.csv b85a28e44824c578ec2df2fcf1495b133247bbd9d6f9f3f311fe6d69141db31b:/data_sffd_service_calls.csv"]
+
+#CMD ["hdfs dfs -put data.csv /"]
 CMD ["python3 example.py"]
