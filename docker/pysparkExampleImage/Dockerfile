@@ -34,10 +34,10 @@ ADD . /app
 #COPY ~/home/jacob/Desktop/DataScience/project/DataScienceProject/docker/data.csv /data
 
 # TODO Get namenode id through terminal or script and insert that into the cmd below
-
+ENV NAMENODEID docker inspect --format="{{.Id}}" namenode
 # running the python file at container startup
-CMD ["docker cp data.csv b85a28e44824c578ec2df2fcf1495b133247bbd9d6f9f3f311fe6d69141db31b:/data.csv"]
-CMD ["docker cp data_sffd_service_calls.csv b85a28e44824c578ec2df2fcf1495b133247bbd9d6f9f3f311fe6d69141db31b:/data_sffd_service_calls.csv"]
+CMD ["docker cp data.csv ${NAMENODEID}:/data.csv"]
+CMD ["docker cp data_sffd_service_calls.csv ${NAMENODEID}:/data_sffd_service_calls.csv"]
 
 #CMD ["hdfs dfs -put data.csv /"]
 CMD ["python3 example.py"]
