@@ -7,7 +7,7 @@ locale.getpreferredencoding()
 
 conf = SparkConf().set('spark.driver.host', '127.0.0.1')
 sc = SparkContext(master='local', appName='myAppName', conf=conf)
-files = "hdfs://172.200.0.2:9000/data.csv"
+files = "hdfs://172.200.0.2:9000/data/data_sffd_service_calls.csv"
 
 # Create an sql context so that we can query data files in sql like syntax
 sqlContext = SQLContext(sc)
