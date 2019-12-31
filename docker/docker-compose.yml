@@ -57,6 +57,7 @@ services:
       - ./hadoop.env
 
   database:
+    container_name: database
     build:
       context: ./../postgresql
       dockerfile: Dockerfile
@@ -72,6 +73,14 @@ services:
       dockerfile: Dockerfile
     image: nodeserver
     container_name: nodeserver
+    links:
+      - database
+    environment:
+      - PGUSER=docker
+      - PGPASSWORD=docker
+      - PGDATABASE=postgres
+      - PGHOST=database
+      - PGPORT=5432
     restart: always
     ports:
       - 8080:8080

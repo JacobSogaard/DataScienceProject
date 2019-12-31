@@ -12,6 +12,8 @@ RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys B97
 #     of PostgreSQL, ``9.3``.
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main" > /etc/apt/sources.list.d/pgdg.list
 
+COPY init.sql /init.sql
+
 # Install ``python-software-properties``, ``software-properties-common`` and PostgreSQL 9.3
 #  There are some warnings (in red) that show up during the build. You can hide
 #  them by prefixing each apt-get statement with DEBIAN_FRONTEND=noninteractive
@@ -28,8 +30,9 @@ USER postgres
 # Note: here we use ``&&\`` to run commands one after the other - the ``\``
 #       allows the RUN command to span multiple lines.
 RUN    /etc/init.d/postgresql start &&\
-    psql --command "CREATE USER docker WITH SUPERUSER PASSWORD 'docker';" &&\
-    createdb -O docker docker
+  psql --command "CREATE USER docker WITH SUPERUSER PASSWORD 'docker';" &&\
+  createdb -O docker docker &&\
+  psql -f /init.sql
 
 # Adjust PostgreSQL configuration so that remote connections to the
 # database are possible.
