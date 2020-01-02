@@ -14,9 +14,8 @@ services:
       - CLUSTER_NAME=test
     env_file:
       - ./hadoop.env
-    networks:
-      cscourse:
-        ipv4_address: 172.200.0.2
+    depends_on:
+      - database
 
   datanode1: #Slave1
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.1.2-java8
@@ -30,9 +29,6 @@ services:
       SERVICE_PRECONDITION: "namenode:9870"
     env_file:
       - ./hadoop.env
-    networks:
-      cscourse:
-        ipv4_address: 172.200.0.3
 
   datanode2: #Slave2
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.1.2-java8
@@ -46,9 +42,6 @@ services:
       SERVICE_PRECONDITION: "namenode:9870"
     env_file:
       - ./hadoop.env
-    networks:
-      cscourse:
-        ipv4_address: 172.200.0.4
 
   datanode3: #Slave3
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.1.2-java8
@@ -62,9 +55,38 @@ services:
       SERVICE_PRECONDITION: "namenode:9870"
     env_file:
       - ./hadoop.env
-    networks:
-      cscourse:
-        ipv4_address: 172.200.0.5
+
+  database:
+    container_name: database
+    build:
+      context: ./../postgresql
+      dockerfile: Dockerfile
+    image: postgresql
+    container_name: postgresql
+    restart: always
+    ports:
+      - 5432:5432
+
+  nodeserver:
+    build:
+      context: ./../nodeserver
+      dockerfile: Dockerfile
+    image: nodeserver
+    container_name: nodeserver
+    links:
+      - database
+    environment:
+      - PGUSER=docker
+      - PGPASSWORD=docker
+      - PGDATABASE=postgres
+      - PGHOST=database
+      - PGPORT=5432
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on: 
+      - database
+
 
   # resourcemanager: #Yarn
   #   image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.1.2-java8

@@ -9,6 +9,7 @@ RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get -yq install python3 python3-pip locales
 RUN python3 -m pip install pyspark
 RUN python3 -m pip install numpy
+RUN python3 -m pip install psycopg2-binary
 
 # cleanup
 RUN apt-get autoremove -y
