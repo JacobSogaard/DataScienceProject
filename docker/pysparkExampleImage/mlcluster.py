@@ -4,21 +4,24 @@ from pyspark.ml.feature import VectorIndexer, VectorAssembler, MinMaxScaler
 from pyspark.ml import Pipeline, PipelineModel
 from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler
 from pyspark.sql import functions as F
+from pyspark.sql.functions import rank,sum,col,lit,array
 from pyspark.sql.window import Window
 from pyspark.sql.types import DoubleType
 
 class Mlcluster:
 
-    def __init__(self, dataframe, spark):
+    def __init__(self, dataframe, spark, sc):
         self.dataframe = dataframe #split the data here at some point
         cols = ["longitude", "latitude"]
         self.assembler = VectorAssembler(inputCols=cols, outputCol="features")
         self.featuredf = self.assembler.transform(dataframe)
-        print(self.featuredf.show(10))
+        self.k = 20
+        #print(self.featuredf.show(10))
 
         #self.dataframe = self.transData(dataframe)
         
         self.spark = spark
+        self.sc = sc
         #self.df = self.featureRow.union(self.dataframe)
 
     def print_input_type(self):
@@ -33,11 +36,16 @@ class Mlcluster:
         #                      outputCol="indexedFeatures").fit(self.dataframe)
 
         
-        model = self.fit_model(self.featuredf, 42, "features", "clusters") #Fit model to kmeans
+        model = self.fit_model(self.featuredf, self.k, "features", "cluster") #Fit model to kmeans
         
-        #self.save_model(model) #Save model to local file path
+        current_model = "kmeansmodel"
+        model_path = "/home/jacob/Desktop/DataScience/project/DataScienceProject/docker/pysparkExampleImage/models" + current_model
 
-        model = self.load_model() #Load saved model from kmeansmodel folder
+        self.save_model(model, model_path) #Save model to local file path
+
+        #model = self.load_model(model_path) #Load saved model from kmeansmodel folder
+       
+
         predictdf = model.transform(self.featuredf) #Transform to dataframe with cluster added
         #print(predictdf.show(10))
 
@@ -49,22 +57,24 @@ class Mlcluster:
         #other_sort = scaled.sort(scaled.count_Scaled.asc()).collect()
         #print(other_sort.show())
         
-        print(self.get_cluster_catergories_percent(predictdf).show())
+        for cluster in self.get_cluster_catergories_percent(predictdf, model.clusterCenters()):
+            print(cluster.show())
 
-    def save_model(self, model):
-        model.save("/home/jacob/Desktop/DataScience/project/DataScienceProject/docker/pysparkExampleImage/kmeansmodel")
+    def save_model(self, model, path):
+        model.save(path)
 
-    def load_model(self):
-        return KMeansModel.load("/home/jacob/Desktop/DataScience/project/DataScienceProject/docker/pysparkExampleImage/kmeansmodel")
+    def load_model(self, path):
+        return KMeansModel.load(path)
 
-    def get_cluster_catergories_percent(self, df):
-        k = 42
-        categories = df.select("category").distinct()
+    def get_cluster_catergories_percent(self, df, centers):
+        print("shooow")
+        print(df.show())
         clusters = []
-        for i in range(k):
+        for i in range(self.k):
             current_cluster = df.filter(df.cluster == i)  #category count
             counts = current_cluster.groupBy('category').count()
             percent = counts.withColumn('percent', F.col('count')/F.sum('count').over(Window.partitionBy()))
+            percent = percent.withColumn('cluster_center', array(lit(centers[i][0]), lit(centers[i][1])))
             percent = percent.orderBy('percent', ascending=False)
             clusters.append(percent)
 

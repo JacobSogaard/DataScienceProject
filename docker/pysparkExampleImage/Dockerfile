@@ -8,6 +8,7 @@ RUN apt-get update
 # installing packages needed and pip packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get -yq install python3 python3-pip locales
 RUN python3 -m pip install pyspark
+RUN python3 -m pip install numpy
 
 # cleanup
 RUN apt-get autoremove -y

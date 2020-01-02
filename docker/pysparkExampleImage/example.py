@@ -27,7 +27,7 @@ df_ml = sqlContext.read.load (files,
 
 
 
-ml = Mlcluster(df_ml, sqlContext)
+ml = Mlcluster(df_ml, sqlContext, sc)
 #ml.print_transposed_data()
 #ml.cluster_data_frame()
 #ml.print_input_type()
