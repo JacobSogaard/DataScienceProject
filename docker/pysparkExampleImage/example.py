@@ -3,6 +3,7 @@ from pyspark import SparkConf, SparkContext, SQLContext
 from mlcluster import Mlcluster
 from config import config
 from database import connect
+import psycopg2
 import os
 import locale
 
@@ -10,6 +11,21 @@ import locale
 print("pwd: " + os.getcwd())
 connection = connect()
 cur = connection.cursor()
+try:
+    cur.execute("SELECT * FROM cities")
+    print("The number of parts: ", cur.rowcount)
+    
+    row = cur.fetchone()
+    while row is not None:
+        print(row)
+        row = cur.fetchone()
+ 
+    cur.close()
+except (Exception, psycopg2.DatabaseError) as error:
+    print(error)
+finally:
+    if cur is not None:
+        cur.close()
 
 
 locale.getdefaultlocale()
@@ -17,7 +33,7 @@ locale.getpreferredencoding()
 
 conf = SparkConf().set('spark.driver.host', '127.0.0.1')
 sc = SparkContext(master='local', appName='myAppName', conf=conf)
-sc.setLogLevel("ERROR")
+sc.setLogLevel("ERR")
 files = "hdfs://172.200.0.2:9000/data.csv"
 files = "hdfs://172.200.0.2:9000/data.csv"
 
@@ -42,8 +58,6 @@ ml = Mlcluster(df_ml, sqlContext, sc)
 #ml.print_input_type()
 ml.cluster_data_frame()
 #ml.print_feature()
-
-                                inferSchema='true').select("location")
 
 
 def get_keyval(row):
@@ -72,7 +86,7 @@ def get_keyval(row):
 
 #print(word_count)
 
-print(word_count)
+#print(word_count)
 
 
 
