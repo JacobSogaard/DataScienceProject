@@ -11,31 +11,18 @@ import locale
 print("pwd: " + os.getcwd())
 connection = connect()
 cur = connection.cursor()
-try:
-    cur.execute("SELECT * FROM cities")
-    print("The number of parts: ", cur.rowcount)
-    
-    row = cur.fetchone()
-    while row is not None:
-        print(row)
-        row = cur.fetchone()
- 
-    cur.close()
-except (Exception, psycopg2.DatabaseError) as error:
-    print(error)
-finally:
-    if cur is not None:
-        cur.close()
+
 
 
 locale.getdefaultlocale()
 locale.getpreferredencoding()
 
+print("start example.py")
 conf = SparkConf().set('spark.driver.host', '127.0.0.1')
 sc = SparkContext(master='local', appName='myAppName', conf=conf)
-sc.setLogLevel("ERR")
-files = "hdfs://172.200.0.2:9000/data.csv"
-files = "hdfs://172.200.0.2:9000/data.csv"
+sc.setLogLevel("ERROR")
+files = "hdfs://namenode:9000/data.csv"
+#files = "hdfs://172.200.0.2:9000/data.csv"
 
 # Create an sql context so that we can query data files in sql like syntax
 sqlContext = SQLContext(sc)
@@ -52,7 +39,7 @@ df_ml = sqlContext.read.load (files,
 
 
 
-ml = Mlcluster(df_ml, sqlContext, sc)
+ml = Mlcluster(df_ml, sqlContext, cur, connection)
 #ml.print_transposed_data()
 #ml.cluster_data_frame()
 #ml.print_input_type()
@@ -86,8 +73,6 @@ def get_keyval(row):
 
 #print(word_count)
 
-#print(word_count)
+print("general kenobi")
 
-
-
-
+print("test print for build image")

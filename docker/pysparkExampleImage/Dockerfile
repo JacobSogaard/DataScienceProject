@@ -30,4 +30,4 @@ ENV LC_ALL en_US.UTF-8
 WORKDIR /app
 ADD . /app
 
-CMD ["python3 example.py"]
+CMD ["python3", "-u", "example.py"]

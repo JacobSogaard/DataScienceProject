@@ -7,21 +7,25 @@ from pyspark.sql import functions as F
 from pyspark.sql.functions import rank,sum,col,lit,array
 from pyspark.sql.window import Window
 from pyspark.sql.types import DoubleType
+import psycopg2
+
 
 class Mlcluster:
 
-    def __init__(self, dataframe, spark, sc):
+    def __init__(self, dataframe, spark, cur, conn):
         self.dataframe = dataframe #split the data here at some point
         cols = ["longitude", "latitude"]
         self.assembler = VectorAssembler(inputCols=cols, outputCol="features")
         self.featuredf = self.assembler.transform(dataframe)
         self.k = 20
+        self.conn = conn
+        print("init ml")
         #print(self.featuredf.show(10))
 
         #self.dataframe = self.transData(dataframe)
         
         self.spark = spark
-        self.sc = sc
+        self.cur = cur
         #self.df = self.featureRow.union(self.dataframe)
 
     def print_input_type(self):
@@ -35,17 +39,16 @@ class Mlcluster:
         #featureIndexer = VectorIndexer(inputCol="features", \
         #                      outputCol="indexedFeatures").fit(self.dataframe)
 
-        
-        model = self.fit_model(self.featuredf, self.k, "features", "cluster") #Fit model to kmeans
+        print("Cluster dataframe")
+        model = self.fit_model(self.featuredf.limit(300), self.k, "features", "cluster") #Fit model to kmeans. Remove limit(300) to use full dataset
         
         current_model = "kmeansmodel"
-        model_path = "/home/jacob/Desktop/DataScience/project/DataScienceProject/docker/pysparkExampleImage/models" + current_model
+        model_path = "/app/models/" + current_model
 
-        self.save_model(model, model_path) #Save model to local file path
-
+        #self.save_model(model, model_path) #Save model to local file path
         #model = self.load_model(model_path) #Load saved model from kmeansmodel folder
        
-
+        print("transform model")
         predictdf = model.transform(self.featuredf) #Transform to dataframe with cluster added
         #print(predictdf.show(10))
 
@@ -56,9 +59,21 @@ class Mlcluster:
 
         #other_sort = scaled.sort(scaled.count_Scaled.asc()).collect()
         #print(other_sort.show())
+        clusters = self.get_cluster_categories_percent(predictdf, model.clusterCenters())
+
+        print("insert cluster")
+        print(clusters)
+        try: 
+            self.insert_cluster_centers_db(clusters, model.clusterCenters())
+            self.cur.close()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        finally:
+            if self.cur is not None:
+                self.cur.close()
+      
+            
         
-        for cluster in self.get_cluster_catergories_percent(predictdf, model.clusterCenters()):
-            print(cluster.show())
 
     def save_model(self, model, path):
         model.save(path)
@@ -66,7 +81,7 @@ class Mlcluster:
     def load_model(self, path):
         return KMeansModel.load(path)
 
-    def get_cluster_catergories_percent(self, df, centers):
+    def get_cluster_categories_percent(self, df, centers):
         print("shooow")
         print(df.show())
         clusters = []
@@ -106,3 +121,33 @@ class Mlcluster:
 
         model = bkm.fit(df) #fit model to data this model should be saved for easy testing. Should also just be training data
         return model
+
+    def insert_cluster_centers_db(self, clusters, clustercenters):
+        cluster_ids = []
+        cluster_centers = []
+        for cc in clustercenters:
+            latitude = cc.item(1)
+            longitude = cc.item(0)
+            statement = "INSERT INTO clustercenters(coordinates) VALUES ('{%s, %s}') RETURNING id"
+            self.cur.execute(statement, (latitude, longitude))
+            id_of_new_row = self.cur.fetchone()[0]
+            cluster_ids.append(id_of_new_row)
+            cluster_centers.append([latitude, longitude])
+
+        index = 0
+        for c in clusters:        
+            kmeans_out = c.select("category", "count", "percent").collect()
+            print("insert")
+            for d in kmeans_out:
+                print("Insert kmeans ouput")
+                statement_insert_kmeans = "INSERT INTO kmeansoutput(category, counts, normalizedcount, percent, cluster) VALUES (%s, %s, %s, %s, %s);"
+                category = d["category"]
+                count = d["count"]
+                percent = d["percent"]
+                self.cur.execute(statement_insert_kmeans, (category, count, 0, percent, cluster_ids[index]))
+
+            index += 1
+            self.conn.commit()
+
+
+        print("all inserted")

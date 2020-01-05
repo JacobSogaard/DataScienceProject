@@ -65,7 +65,7 @@ services:
     container_name: postgresql
     restart: always
     ports:
-      - 5433:5433
+      - 5432:5432
 
   nodeserver:
     build:
@@ -86,6 +86,19 @@ services:
       - 8080:8080
     depends_on: 
       - database
+
+  pyspark:
+      image: datascienceproject:latest
+      restart: always
+      build:
+        context: ./pysparkExampleImage
+        dockerfile: Dockerfile
+      volumes:
+        - hadoop_namenode:/hadoop/dfs/name
+      env_file: ./hadoop.env
+      depends_on:
+       - database
+       - namenode
 
 
   # resourcemanager: #Yarn
