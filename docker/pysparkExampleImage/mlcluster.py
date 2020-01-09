@@ -40,7 +40,7 @@ class Mlcluster:
         #                      outputCol="indexedFeatures").fit(self.dataframe)
 
         print("Cluster dataframe")
-        model = self.fit_model(self.featuredf.limit(300), self.k, "features", "cluster") #Fit model to kmeans. Remove limit(300) to use full dataset
+        model = self.fit_model(self.featuredf, self.k, "features", "cluster") #Fit model to kmeans. Remove limit(300) to use full dataset
         
         current_model = "kmeansmodel"
         model_path = "/app/models/" + current_model

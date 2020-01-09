@@ -89,7 +89,6 @@ services:
 
   pyspark:
       image: datascienceproject:latest
-      restart: always
       build:
         context: ./pysparkExampleImage
         dockerfile: Dockerfile
