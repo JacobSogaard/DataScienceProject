@@ -30,44 +30,45 @@
 
   -->
 
-  <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Heatmaps</title>
-        <style>
-          /* Always set the map height explicitly to define the size of the div
-           * element that contains the map. */
-          #map {
-            height: 100%;
-          }
-          /* Optional: Makes the sample page fill the window. */
-          html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-          }
-          
-        </style>
-      </head>
-    
-      <body>
-        <div id="map"></div>
-    
+<html>
 
-    
-    <!-- Scripts -->
-    <script
-  src="https://code.jquery.com/jquery-3.4.1.min.js"
-  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
-  crossorigin="anonymous"></script>
+<head>
+  <meta charset="utf-8">
+  <title>Heatmaps</title>
+  <style>
+    /* Always set the map height explicitly to define the size of the div
+           * element that contains the map. */
+    #map {
+      height: 100%;
+    }
+
+    /* Optional: Makes the sample page fill the window. */
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+
+
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script src="papaparse.min.js"></script>
   <script src="./node_modules/chart.js/dist/Chart.min.js"></script>
-    <script src="scripts.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-    <script async defer
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrofnx2gVRFF4oQNoaCAm6Bc78yfgmCIA&libraries=visualization&callback=initMap">
-</script>
+  <script src="scripts.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrofnx2gVRFF4oQNoaCAm6Bc78yfgmCIA&libraries=visualization">
+    </script>
 
-    
+
 </body>
+
 </html>

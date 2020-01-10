@@ -28,7 +28,6 @@ $(document).ready(function() {
 var map, heatmap, info;
 
 function renderMap(data) {
-  console.log('rendering map');
   map = new google.maps.Map(document.getElementById('map'), {
     zoom: 13,
     center: { lat: 37.783508, lng: -122.439525 },
@@ -51,49 +50,50 @@ function renderMap(data) {
       infowindow: infowindow
     });
 
-    var infoContent;
-    (function(marker, content, infowindow) {
-      google.maps.event.addListener(marker, 'click', function() {
-        $.ajax({
-          type: 'get',
-          url: 'http://localhost:8080/clusterdata/' + marker.id,
-          dataType: 'json',
+    initMarker(marker, infowindow);
+  }
+}
 
-          success: function(result) {
-            console.log('success: ', result);
-            console.log(marker.id);
-            var data = result;
+function initMarker(marker, infowindow) {
+  $.ajax({
+    type: 'get',
+    url: 'http://localhost:8080/clusterdata/' + marker.id,
+    dataType: 'json',
 
-            var infostring =
-              '<div id="bodyContent"><p><b>Category    Counts    Percent</p>';
-            console.log(data.length);
-            for (var i = 0; i < data.length; i++) {
-              infostring +=
-                '<p><b>' +
-                data[i].category +
-                '  |  ' +
-                data[i].counts +
-                '  |  ' +
-                (data[i].percent * 100).toFixed(2) +
-                '%</p>';
-              console.log(infostring);
-            }
-            infostring.concat('</div>');
+    success: function(result) {
+      var data = result;
 
-            marker.infowindow.setContent(infostring);
-          },
-          error: function(xhr, status, error) {
-            var errorMsg = xhr.status + ': ' + xhr.statusText;
-            console.log('error: ', errorMsg);
-          },
+      var infostring =
+        '<div id="bodyContent"><p><b>Category    Counts    Percent</p>';
+      for (var i = 0; i < data.length; i++) {
+        infostring +=
+          '<p><b>' +
+          data[i].category +
+          '  |  ' +
+          data[i].counts +
+          '  |  ' +
+          (data[i].percent * 100).toFixed(2) +
+          '%</p>';
+      }
+      infostring.concat('</div>');
 
-          complete: function(data) {}
-        });
-        infowindow.setContent(content);
+      marker.infowindow.setContent(infostring);
+    },
+    error: function(xhr, status, error) {
+      var errorMsg = xhr.status + ': ' + xhr.statusText;
+      console.log('error: ', errorMsg);
+    },
+
+    complete: function(data) {
+      google.maps.event.addListener(marker, 'mouseover', function() {
         infowindow.open(map, marker);
       });
-    })(marker, info, infowindow);
-  }
+
+      google.maps.event.addListener(marker, 'mouseout', function() {
+        infowindow.close();
+      });
+    }
+  });
 }
 
 function toggleHeatmap() {
