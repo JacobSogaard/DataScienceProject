@@ -4,6 +4,9 @@ services:
   namenode: #Master (metadata/chunk)
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.1.2-java8
     container_name: namenode
+    build:
+      context: ./../namenode
+      dockerfile: Dockerfile
     restart: always
     ports:
       - 9870:9870
