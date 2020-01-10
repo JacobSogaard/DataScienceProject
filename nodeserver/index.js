@@ -8,6 +8,8 @@ const { Client } = require('pg');
 const client = new Client();
 client.connect();
 
+app.use(express.static(__dirname + '/public'));
+
 app.get('/', (req, res) => res.send(JSON.stringify(client)));
 
 app.get('/cities', (req, res) => {
@@ -31,24 +33,30 @@ app.get('/centers', (req, res) => {
 });
 
 app.get('/clustercenters', (req, res) => {
-  client.query('SELECT * from kmeansoutput INNER JOIN clustercenters ON clustercenters.id = kmeansoutput.cluster;', (err, results) => {
-    if (err) {
-      console.log('error: ' + err);
-      throw err;
+  client.query(
+    'SELECT * from kmeansoutput INNER JOIN clustercenters ON clustercenters.id = kmeansoutput.cluster;',
+    (err, results) => {
+      if (err) {
+        console.log('error: ' + err);
+        throw err;
+      }
+      res.send(JSON.stringify(results.rows));
     }
-    res.send(JSON.stringify(results.rows));
-  });
+  );
 });
 
 app.get('/clusterdata/:cluster', (req, res) => {
   var cluster = req.params.cluster;
-  client.query(`SELECT * from kmeansoutput WHERE cluster = ${cluster} ORDER BY percent DESC LIMIT 10;`, (err, results) => {
-    if (err) {
-      console.log('error: ' + err);
-      throw err;
+  client.query(
+    `SELECT * from kmeansoutput WHERE cluster = ${cluster} ORDER BY percent DESC LIMIT 10;`,
+    (err, results) => {
+      if (err) {
+        console.log('error: ' + err);
+        throw err;
+      }
+      res.send(JSON.stringify(results.rows));
     }
-    res.send(JSON.stringify(results.rows));
-  });
+  );
 });
 
 app.listen(PORT, () => {
