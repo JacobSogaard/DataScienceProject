@@ -1,7 +1,7 @@
 
 #!/bin/bash
 sudo -u hdfs hdfs dfsadmin -safemode leave
-hdfs dfs -put /data/data.csv /
+hdfs dfs -put /data.csv /
 
 namedir=`echo $HDFS_CONF_dfs_namenode_name_dir | perl -pe 's#file://##'`
 if [ ! -d $namedir ]; then
